@@ -1,4 +1,3 @@
-a
 
 class Cliente:
     def __init__(self, numero, nombre, apellido, dni, tipo, transacciones):
