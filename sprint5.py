@@ -1,18 +1,52 @@
+class cuentas():
+    def __init__(self, numero, clase, moneda):
+        self.numero = numero
+        self.clase = clase
+        self.moneda = moneda
 
-from enum import Enum
+class CajaAhorroPesos(cuentas):
+    def __init__(self, numero, clase, moneda):
+        super().__init__(numero, clase, moneda)
 
-class TipoCuenta(Enum):
-    CAJA_AHORRO_PESOS = "Caja de Ahorro en Pesos"
-    CAJA_AHORRO_DOLARES = "Caja de Ahorro en Dólares"
-    CUENTA_CORRIENTE_PESOS = "Cuenta Corriente en Pesos"
-    CUENTA_CORRIENTE_DOLARES = "Cuenta Corriente en Dólares"
-    CUENTA_INVERSION = "Cuenta Inversión"
+class CajaAhorroDolares(cuentas):
+    def __init__(self, numero, clase, moneda):
+        super().__init__(numero, clase, moneda)
 
-class TipoTarjeta(Enum):
-    DEBITO = "Tarjeta de Débito"
-    VISA = "Tarjeta VISA"
-    MASTERCARD = "Tarjeta Mastercard"
-    AMEX = "Tarjeta American Express"
+class CuentaCorrientePesos(cuentas):
+    def __init__(self, numero, clase, moneda):
+        super().__init__(numero, clase, moneda)
+
+class CuentaCorrienteDolares(cuentas):
+    def __init__(self, numero, clase, moneda):
+        super().__init__(numero, clase, moneda)
+
+class CuentaInversion(cuentas): 
+    def __init__(self, numero, clase, moneda):
+        super().__init__(numero, clase, moneda)
+
+class Tarjeta:
+    def __init__(self, limite_retiro_diario, limite_pago, limite_cuotas):
+        self.limite_retiro_diario = limite_retiro_diario
+        self.limite_pago = limite_pago
+        self.limite_cuotas = limite_cuotas
+
+class TarjetaDebito(Tarjeta):
+    def __init__(self, limite_retiro_diario):
+        super().__init__(limite_retiro_diario, 0, 0)
+
+
+class TarjetaAmex(Tarjeta):
+    def __init__(self, limite_retiro_diario, limite_pago, limite_cuotas):
+        super().__init__(limite_retiro_diario, limite_pago, limite_cuotas)
+
+class TarjetaMastercard(Tarjeta):
+    def __init__(self, limite_retiro_diario, limite_pago, limite_cuotas):
+        super().__init__(limite_retiro_diario, limite_pago, limite_cuotas)
+
+class TarjetaVisa(Tarjeta):
+    def __init__(self, limite_retiro_diario, limite_pago, limite_cuotas):
+        super().__init__(limite_retiro_diario, limite_pago, limite_cuotas)
+
 
 class Cliente:
     def __init__(self, numero, nombre, apellido, dni, tipo, transacciones):
@@ -22,19 +56,34 @@ class Cliente:
         self.dni = dni
         self.tipo = tipo
         self.transacciones = transacciones
+        self.limite_retiro_diario = self._establecer_limite_retiro()
+        self.limite_pago, self.limite_cuotas = self._establecer_limites_tarjeta()
 
-    
+    def _establecer_limite_retiro(self):
+        if self.tipo == "Classic":
+            return 10000
+        elif self.tipo == "Gold":
+            return 15000
+        elif self.tipo == "Black":
+            return 20000
+        
+    def _establecer_limites_tarjeta(self):
+        if self.tipo == "Classic":
+            return 500000, 600000
+        elif self.tipo == "Gold":
+            return 800000, 1000000
+        elif self.tipo == "Black":
+            return 1000000, 1200000    
 
 class Classic(Cliente):
-    def __init__(self, cuentas, tarjetas, tarjetas_debito=0):
-        super().__init__("Classic", cuentas, [])
-        self.tarjetas_debito = tarjetas_debito
+    def __init__(self, numero, nombre, apellido, dni, transacciones):
+        super().__init__(numero, nombre, apellido, dni, "Classic", transacciones)
+        self.tarjeta_debito = TarjetaDebito("Classic")
         self.cajas_ahorro_pesos = 1
         self.cajas_ahorro_dolares = 0
         self.cargo_caja_dolares_mensual = 0
         self.retiro_efectivo_gratuito = 5
         self.tarifa_retiro_excedido = 10
-        self.limite_retiro_diario = 10000
         self.acceso_tarjeta_credito = False
         self.comision_transferencia_saliente = 0.01
         self.comision_transferencia_entrante = 0.005
@@ -59,9 +108,9 @@ class Classic(Cliente):
 
 
 class Gold(Cliente):
-    def __init__(self, cuentas, tarjetas, tarjetas_debito=0):
-        super().__init__("Gold", cuentas, [])
-        self.tarjetas_debito = tarjetas_debito
+    def __init__(self, numero, nombre, apellido, dni, transacciones):
+        super().__init__(numero, nombre, apellido, dni, "Gold", transacciones)
+        self.tarjeta_debito = TarjetaDebito("Gold")
         self.cajas_ahorro_pesos = 2
         self.cuenta_corriente = 1
         self.cajas_ahorro_dolares_extra = 0
@@ -70,12 +119,6 @@ class Gold(Cliente):
         self.extensiones_visa = 5
         self.tarjetas_mastercard = 1
         self.extensiones_mastercard = 5
-        self.limite_pago_visa = 150000
-        self.limite_cuotas_visa = 100000
-        self.limite_pago_mastercard = 150000
-        self.limite_cuotas_mastercard = 100000
-        self.limite_retiro_diario = 20000
-        self.retiro_gratuito_diario = 20000
         self.acceso_cuentas_inversion = True
         self.chequera = True
         self.comision_transferencia_saliente = 0.005
@@ -100,9 +143,9 @@ class Gold(Cliente):
             print(f"Error: El monto de retiro (${monto}) excede el límite diario permitido (${self.limite_retiro_diario}).")
 
 class Black(Cliente):
-    def __init__(self, cuentas, tarjetas, tarjetas_debito=0):
-        super().__init__("Black", cuentas, [])
-        self.tarjetas_debito = tarjetas_debito
+    def __init__(self, numero, nombre, apellido, dni, transacciones):
+        super().__init__(numero, nombre, apellido, dni, "Black", transacciones)
+        self.tarjeta_debito = TarjetaDebito("Black")
         self.cajas_ahorro_dolares = 5
         self.cuentas_corrientes = 3
         self.tarjetas_visa = 1
@@ -111,13 +154,6 @@ class Black(Cliente):
         self.extensiones_mastercard = 10
         self.tarjetas_amex = 1
         self.extensiones_amex = 10
-        self.limite_pago_visa = 500000
-        self.limite_cuotas_visa = 600000
-        self.limite_pago_mastercard = 500000
-        self.limite_cuotas_mastercard = 600000
-        self.limite_pago_amex = 500000
-        self.limite_cuotas_amex = 600000
-        self.limite_retiro_diario = 100000
         self.retiro_gratuito_mensual = True
         self.acceso_cuentas_inversion = True
         self.chequeras = 2
@@ -185,7 +221,6 @@ transacciones_cliente2 = [
 
 cliente1 = Cliente(numero=100001, nombre="Nicolas", apellido="Gaston", dni="29494777", tipo="Black", transacciones=transacciones_cliente1)
 cliente2 = Cliente(numero=100002, nombre="María", apellido="López", dni="12345678", tipo="Classic", transacciones=transacciones_cliente2)
-
 
 
 reporte_cliente1 = generar_reporte(cliente1)
